@@ -1,12 +1,12 @@
 function blog() {
     # Set your paths here
     local -r BLOG_DIR="$HOME/develop/blog"
-    local -r EDITOR="nvim"
+    local -r EDITOR="code"
     local -r POSTS_DIR="$BLOG_DIR/content/posts"
 
     # Check if we're in the blog directory already
     if [[ "$PWD" != "$BLOG_DIR"* ]]; then
-        cd "$BLOG_DIR" || { echo "Error: Could not cd to $BLOG_DIR"; return 1 }
+        $EDITOR "$BLOG_DIR" || { echo "Error: Could not cd to $BLOG_DIR"; return 1 }
     fi
 
     local -r fd_result=$(
@@ -38,12 +38,14 @@ function blog() {
             ;;
         write)
             hugo new "content/posts/$2/index.md"
-            $EDITOR "$fzf_result"
+            if $EDIROT == "code"; then
+              $EDITOR "$BLOG_DIR" "$fzf_result"
+            else if $EDITOR == "nvim"
+              $EDITOR "$BLOG_DIR" +"e $fzf_result"
+            fi
             ;;
         server)
-            hugo server -D &  # Run in background with draft posts
-            sleep 2  # Wait for server to start
-            xdg-open "http://localhost:1313"  # Open in default browser (Mac)
+            hugo server -D -F -O --disableFastRender   # Run in background with draft posts
             # For Linux, you might use: xdg-open "http://localhost:1313"
             ;;
         deploy)
